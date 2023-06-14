@@ -1,4 +1,3 @@
-import json
 from shapely import wkb
 from shapely.geometry import shape
 

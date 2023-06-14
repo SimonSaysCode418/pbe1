@@ -6,7 +6,7 @@ class BuildingParameterService:
 
     def __init__(self):
         self.data = pd.read_excel(os.getcwd() + '\\resources\\Import_Gebaude_Parameter.xlsx',
-                                   converters={'housenumber': str})
+                                  converters={'housenumber': str})
         self.data.drop_duplicates(subset=['street', 'housenumber'], keep='first', inplace=True)
         self.last_result = None
 

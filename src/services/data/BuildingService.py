@@ -18,6 +18,7 @@ class BuildingService:
 
     def initializeDB(self):
         self.br.initializeDB()
+
     def get_building_data(self) -> list[BuildingData]:
         return self.br.building_data
 

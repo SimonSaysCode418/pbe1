@@ -5,8 +5,10 @@ def create_raw_tables(cursor):
     create_raw_pipe_point(cursor)
     create_raw_pipe_path(cursor)
 
+
 def create_building_tables(cursor):
     create_building(cursor)
+
 
 def create_pipe_tables(cursor):
     create_pipe_point(cursor)

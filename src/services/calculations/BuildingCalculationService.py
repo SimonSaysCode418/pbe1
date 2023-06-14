@@ -18,6 +18,7 @@ class BuildingCalculationService:
     def __del__(self):
         del self.iwus
         del self.bps
+
     def run(self):
         for building in self.building_data:
             building.yearOfConstruction = self.bps.get_year_of_construction(building)
@@ -45,6 +46,7 @@ class BuildingCalculationService:
                     building.powerHeating + building.powerHotWater)
 
         self.save_buildings()
+
     def calculateTransmissionSurface(self, building):
         coefficient = self.iwus.get_iwu_value(building.type, building.yearOfConstruction,
                                               'Wärmetransferkoeffizient Hüllfläche (W/m²K)')

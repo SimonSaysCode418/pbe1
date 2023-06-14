@@ -53,5 +53,6 @@ def find_shortest_paths(start_point, point_data: list[PipePointData], path_data:
 
     return shortest_paths
 
+
 def find_critical_path(shortest_paths):
     return max(shortest_paths, key=lambda x: x['distance']) if shortest_paths else {}

@@ -1,6 +1,5 @@
 import json
 import os
-
 import fiona
 import numpy
 import pandas as pd

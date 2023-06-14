@@ -61,8 +61,6 @@ class BuildingDataDB(BuildingData):
             # else:
             #     setattr(self, attribute, shape(wkb.loads(args[index], hex=True).__geo_interface__))
 
-
-
         # self.street = args[1]
         # self.housenumber = args[2]
         # self.postcode = args[3]
@@ -90,10 +88,3 @@ class BuildingDataDB(BuildingData):
         # self.demandHotWater = args[25]
         # self.fullLoadHours = args[26]
         # self.geometry = shape(wkb.loads(args[27], hex=True).__geo_interface__)
-
-
-
-
-
-
-

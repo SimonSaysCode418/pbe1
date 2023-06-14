@@ -9,6 +9,7 @@ from services.helper.BasicParameterService import BasicParameterService
 from services.helper.Graph import find_shortest_paths, find_critical_path
 from services.helper.PipeTypeService import PipeTypeService
 
+
 class PipeCalculationService:
     def __init__(self, parameter_service, pipe_service, building_service):
         self.bps: BasicParameterService = parameter_service
@@ -89,13 +90,13 @@ class PipeCalculationService:
                      path.pipeNominalSizeFlow,
                      path.pipeInsulationFlow,
                      path.pipeDiameterFlow] = self.pts.get_pipe_element_next_size(path.pipeTypeFlow,
-                                                                                    path.pipeNominalSizeFlow)
+                                                                                  path.pipeNominalSizeFlow)
                 if change_return:
                     [path.pipeTypeReturn,
                      path.pipeNominalSizeReturn,
                      path.pipeInsulationReturn,
                      path.pipeDiameterReturn] = self.pts.get_pipe_element_next_size(path.pipeTypeReturn,
-                                                                                      path.pipeNominalSizeReturn)
+                                                                                    path.pipeNominalSizeReturn)
 
             # Wenn das Vorlaufrohr vom Typ ..-Duo ist, dann muss das Rücklaufrohr vom selben Typ sein
             if path.pipeTypeFlow.find('Duo'):

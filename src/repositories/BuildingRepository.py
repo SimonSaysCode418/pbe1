@@ -1,5 +1,6 @@
 from _decimal import Decimal
 from pandas import merge_asof, DataFrame
+
 from models.data.BuildingData import BuildingDataRaw, BuildingDataDB
 
 

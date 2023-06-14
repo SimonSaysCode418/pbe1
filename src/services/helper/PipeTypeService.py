@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from services.helper.BasicParameterService import BasicParameterService
 
+
 class PipeTypeService:
 
     def __init__(self, basic_parameter_service):
@@ -33,8 +34,7 @@ class PipeTypeService:
     def get_pipe_element_next_size(self, pipe_type, nominal_size):
         filtered_types = self.pipe_types[pipe_type]
         pipe = filtered_types.loc[(filtered_types['Nennweite'] == nominal_size)].to_dict(orient='records')[0]
-        return self.get_pipe_element(pipe['Innendurchmesser'] + 0.0001) #0.0001 für nächste Rohrgröße
-
+        return self.get_pipe_element(pipe['Innendurchmesser'] + 0.0001)  # 0.0001 für nächste Rohrgröße
 
     def get_inner_diameter(self, type, nominal_size):
         filtered_types = self.pipe_types[type]
@@ -62,7 +62,9 @@ class PipeTypeService:
         return self.bps.get_parameter_value('Rohrauswahl', 'Untergrenze Hydraulisch glatt')
 
     def get_limit_hydraulically_smooth(self, inner_diameter):
-        return self.get_relative_pipe_roughness_D_k(inner_diameter) * math.log(0.1 * self.get_relative_pipe_roughness_D_k(inner_diameter))
+        return self.get_relative_pipe_roughness_D_k(inner_diameter) * math.log(
+            0.1 * self.get_relative_pipe_roughness_D_k(inner_diameter))
 
     def get_limit_transitional_area(self, inner_diameter):
-        return 400 * self.get_relative_pipe_roughness_D_k(inner_diameter) * math.log(3.715 * self.get_relative_pipe_roughness_D_k(inner_diameter))
+        return 400 * self.get_relative_pipe_roughness_D_k(inner_diameter) * math.log(
+            3.715 * self.get_relative_pipe_roughness_D_k(inner_diameter))
