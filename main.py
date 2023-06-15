@@ -46,7 +46,6 @@ def main():
     del pipe_service
 
 
-
 if __name__ == "__main__":
     main()
     sys.exit()
