@@ -1,11 +1,19 @@
+import shapely
 from shapely import wkb
 from shapely.geometry import shape
 
 
 class RawBuildingHeight:
+    id: int
+    longitude: float
+    latitude: float
+    height: float
+    roof: str
+    geometry: shapely.Polygon
+
     def __init__(self, x, y, height, roof_shape, geometry):
-        self.coordinateX = x
-        self.coordinateY = y
+        self.longitude = x
+        self.latitude = y
         self.height = height
         self.roof = roof_shape
         self.geometry = shape(geometry)

@@ -1,11 +1,11 @@
 import sys
 from collections import defaultdict
 
-from models.data.PipePathData import PipePathData
-from models.data.PipePointData import PipePointData
+from models.data.Pipe import Pipe
+from models.data.Point import Point
 
 
-def find_shortest_paths(start_point, point_data: list[PipePointData], path_data: list[PipePathData]):
+def find_shortest_paths(start_point, point_data: list[Point], path_data: list[Pipe]):
     graph = defaultdict(list)
     for path in path_data:
         graph[path.startPointId].append((path.endPointId, path.id))

@@ -1,4 +1,7 @@
-class ShortestPathConnector:
-    def __init__(self, point_id, path_id):
+class ShortestPathConnector(object):
+    pointId: int
+    pipeId: int
+
+    def __init__(self, point_id, pipe_id):
         self.pointId = point_id
-        self.pathId = path_id
+        self.pipeId = pipe_id

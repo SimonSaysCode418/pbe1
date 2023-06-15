@@ -1,8 +1,8 @@
-from services.helper.BuildingParameterService import BuildingParameterService
+from services.helper.BuildingGroupYocService import BuildingGroupYocService
 from services.data.BuildingService import BuildingService
 from services.helper.IWUService import IWUService
 from services.helper.BasicParameterService import BasicParameterService
-from models.data.BuildingData import BuildingData
+from models.data.Building import Building
 
 
 class BuildingCalculationService:
@@ -11,24 +11,24 @@ class BuildingCalculationService:
         self.bs: BuildingService = building_service
 
         self.iwus: IWUService = IWUService()
-        self.bps: BuildingParameterService = BuildingParameterService()
+        self.bgys: BuildingGroupYocService = BuildingGroupYocService()
 
-        self.building_data: list[BuildingData] = self.bs.get_building_data()
+        self.building_data: list[Building] = self.bs.get_building_data()
 
     def __del__(self):
         del self.iwus
-        del self.bps
+        del self.bgys
 
     def run(self):
         for building in self.building_data:
-            building.yearOfConstruction = self.bps.get_year_of_construction(building)
-            building.groupname = self.bps.get_building_group()
+            building.yearOfConstruction = self.bgys.get_year_of_construction(building)
+            building.groupname = self.bgys.get_building_group()
             building.floors = self.ps.get_parameter_value('Etagen', building.type)
             building.wallArea = building.floors * building.wallAreaPerFloor
-            building.roofArea = building.groundArea / (
+            building.roofArea = building.floorArea / (
                 self.ps.get_parameter_value('Gebäudefaktor', 'Giebeldachfläche') if building.roof == 'gabled' else 1)
             building.surface = building.wallArea + building.roofArea
-            building.energyReferenceArea = building.groundArea * building.floors * self.ps.get_parameter_value(
+            building.energyReferenceArea = building.floorArea * building.floors * self.ps.get_parameter_value(
                 'Gebäudefaktor', 'Energiebezugsfläche')
             building.livingArea = building.energyReferenceArea * self.ps.get_parameter_value(
                 'Gebäudefaktor', 'Wohnfläche')

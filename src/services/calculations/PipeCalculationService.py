@@ -1,7 +1,7 @@
 import math
 
-from models.data.PipePathData import PipePathData
-from models.data.PipePointData import PipePointData
+from models.data.Pipe import Pipe
+from models.data.Point import Point
 from models.data.ShortestPathConnector import ShortestPathConnector
 from services.data.BuildingService import BuildingService
 from services.data.PipeService import PipeService
@@ -18,8 +18,8 @@ class PipeCalculationService:
 
         self.pts: PipeTypeService = PipeTypeService(self.bps)
 
-        self.pipe_points: list[PipePointData] = self.ps.get_pipe_point_data()
-        self.pipe_paths: list[PipePathData] = self.ps.get_pipe_path_data()
+        self.points: list[Point] = self.ps.get_pipe_point_data()
+        self.pipes: list[Pipe] = self.ps.get_pipe_path_data()
 
         self.shortest_paths = None
         self.critical_path = None
@@ -30,48 +30,49 @@ class PipeCalculationService:
     def run(self):
         self.set_building_data_to_connectors()
 
-        start_point = next((point for point in self.pipe_points if point.type == 'Source'), None)
-        self.shortest_paths = find_shortest_paths(start_point, self.pipe_points, self.pipe_paths)
+        start_point = next((point for point in self.points if point.type == 'Source'), None)
+        self.shortest_paths = find_shortest_paths(start_point, self.points, self.pipes)
         self.critical_path = find_critical_path(self.shortest_paths)
 
-        self.pipe_paths = [path for path in self.pipe_paths if
-                           any(path.id in short_path['path'] for short_path in self.shortest_paths)]
+        self.pipes = [pipe for pipe in self.pipes if
+                      any(pipe.id in short_path['path'] for short_path in self.shortest_paths)]
 
-        self.initialize_paths()
+        for pipe in self.pipes:
+            self.initialize_pipe(pipe)
+            self.optimize_pipe_by_pressure_loss(pipe)
+
         self.save_pipes()
 
-    def initialize_paths(self):
-        for path in self.pipe_paths:
-            connectors = [short_path for short_path in self.shortest_paths if path.id in short_path['path']]
+    def initialize_pipe(self, pipe):
+        connectors = [short_path for short_path in self.shortest_paths if pipe.id in short_path['path']]
 
-            path.massFlowRate = sum([point.massFlowRate for point in self.pipe_points if
-                                     any(connector['connector'] == point.id for connector in connectors)])
+        pipe.massFlowRate = sum([point.massFlowRate for point in self.points if
+                                 any(connector['connector'] == point.id for connector in connectors)])
 
-            path.initialPipeDiameterFlow = self.calculate_initial_pipe_diameter(path, 'flow')
-            path.initialPipeDiameterReturn = self.calculate_initial_pipe_diameter(path, 'return')
+        pipe.initialDiameterFlow = self.calculate_initial_pipe_diameter(pipe, 'flow')
+        pipe.initialDiameterReturn = self.calculate_initial_pipe_diameter(pipe, 'return')
 
-            [path.initialPipeTypeFlow,
-             path.initialPipeNominalSizeFlow,
-             path.initialPipeInsulationFlow,
-             path.pipeDiameterFlow] = self.pts.get_pipe_element(path.initialPipeDiameterFlow)
+        [pipe.initialTypeFlow,
+         pipe.initialNominalSizeFlow,
+         pipe.initialInsulationFlow,
+         pipe.diameterFlow] = self.pts.get_pipe_element(pipe.initialDiameterFlow)
 
-            [path.initialPipeTypeReturn,
-             path.initialPipeNominalSizeReturn,
-             path.initialPipeInsulationReturn,
-             path.pipeDiameterReturn] = self.pts.get_pipe_element(path.initialPipeDiameterReturn)
+        [pipe.initialTypeReturn,
+         pipe.initialNominalSizeReturn,
+         pipe.initialInsulationReturn,
+         pipe.diameterReturn] = self.pts.get_pipe_element(pipe.initialDiameterReturn)
 
-            path.pipeTypeFlow = path.initialPipeTypeFlow
-            path.pipeNominalSizeFlow = path.initialPipeNominalSizeFlow
-            path.pipeInsulationFlow = path.initialPipeInsulationFlow
+        pipe.typeFlow = pipe.initialTypeFlow
+        pipe.nominalSizeFlow = pipe.initialNominalSizeFlow
+        pipe.insulationFlow = pipe.initialInsulationFlow
 
-            path.pipeTypeReturn = path.initialPipeTypeReturn
-            path.pipeNominalSizeReturn = path.initialPipeNominalSizeReturn
-            path.pipeInsulationReturn = path.initialPipeInsulationReturn
+        pipe.typeReturn = pipe.initialTypeReturn
+        pipe.nominalSizeReturn = pipe.initialNominalSizeReturn
+        pipe.insulationReturn = pipe.initialInsulationReturn
 
-            self.optimize_pipe_by_pressure_loss(path)
-            self.calculate_heat_loss(path)
+        self.calculate_pipe_heat_loss(pipe)
 
-    def optimize_pipe_by_pressure_loss(self, path):
+    def optimize_pipe_by_pressure_loss(self, pipe):
 
         tolerable_pressure_loss = self.bps.get_parameter_value('Netzauslegung',
                                                                'tolerabler Druckverlust allgemein (Pa/m)')
@@ -79,65 +80,65 @@ class PipeCalculationService:
         for index in range(10):
             # Ändern der Rohrdurchmesser, ab der 2. Iteration (1. Iteration = Initialisierung)
             if index > 0:
-                change_flow = path.pipeSpecificPressureLossFlow > tolerable_pressure_loss
-                change_return = path.pipeSpecificPressureLossReturn > tolerable_pressure_loss
+                change_flow = pipe.specificPressureLossFlow > tolerable_pressure_loss
+                change_return = pipe.specificPressureLossReturn > tolerable_pressure_loss
 
                 if not (change_flow | change_return):
                     return
 
                 if change_flow:
-                    [path.pipeTypeFlow,
-                     path.pipeNominalSizeFlow,
-                     path.pipeInsulationFlow,
-                     path.pipeDiameterFlow] = self.pts.get_pipe_element_next_size(path.pipeTypeFlow,
-                                                                                  path.pipeNominalSizeFlow)
+                    [pipe.typeFlow,
+                     pipe.nominalSizeFlow,
+                     pipe.insulationFlow,
+                     pipe.diameterFlow] = self.pts.get_pipe_element_next_size(pipe.typeFlow,
+                                                                              pipe.nominalSizeFlow)
                 if change_return:
-                    [path.pipeTypeReturn,
-                     path.pipeNominalSizeReturn,
-                     path.pipeInsulationReturn,
-                     path.pipeDiameterReturn] = self.pts.get_pipe_element_next_size(path.pipeTypeReturn,
-                                                                                    path.pipeNominalSizeReturn)
+                    [pipe.typeReturn,
+                     pipe.nominalSizeReturn,
+                     pipe.insulationReturn,
+                     pipe.diameterReturn] = self.pts.get_pipe_element_next_size(pipe.typeReturn,
+                                                                                pipe.nominalSizeReturn)
 
             # Wenn das Vorlaufrohr vom Typ ..-Duo ist, dann muss das Rücklaufrohr vom selben Typ sein
-            if path.pipeTypeFlow.find('Duo'):
-                path.pipeTypeReturn = path.pipeTypeFlow
-                path.pipeNominalSizeReturn = path.pipeNominalSizeFlow
-                path.pipeDiameterReturn = path.pipeDiameterFlow
-                path.pipeInsulationReturn = path.pipeInsulationFlow
+            if pipe.typeFlow.find('Duo'):
+                pipe.typeReturn = pipe.typeFlow
+                pipe.nominalSizeReturn = pipe.nominalSizeFlow
+                pipe.diameterReturn = pipe.diameterFlow
+                pipe.insulationReturn = pipe.insulationFlow
 
             # Vorlauf Berechnung
-            path.pipeFlowVelocityFlow = self.calculate_flow_velocity(path.massFlowRate, path.pipeTypeFlow,
-                                                                     path.pipeNominalSizeFlow, 'flow')
-            path.pipeReynoldFlow = self.calculate_reynold(path.pipeFlowVelocityFlow, path.pipeDiameterFlow, 'flow')
-            path.pipeLambdaFlow = self.calculate_lambda(path.pipeDiameterFlow, path.pipeReynoldFlow)
-            path.pipePressureLossFlow = self.calculate_pressure_loss(path.pipeLambdaFlow, path.length,
-                                                                     path.pipeDiameterFlow,
-                                                                     path.pipeFlowVelocityFlow, 'flow')
-            path.pipeSpecificPressureLossFlow = path.pipePressureLossFlow / path.length
+            pipe.flowVelocityFlow = self.calculate_flow_velocity(pipe.massFlowRate, pipe.typeFlow,
+                                                                 pipe.nominalSizeFlow, 'flow')
+            pipe.reynoldFlow = self.calculate_reynold(pipe.flowVelocityFlow, pipe.diameterFlow, 'flow')
+            pipe.lambdaFlow = self.calculate_lambda(pipe.diameterFlow, pipe.reynoldFlow)
+            pipe.pressureLossFlow = self.calculate_pressure_loss(pipe.lambdaFlow, pipe.length,
+                                                                 pipe.diameterFlow,
+                                                                 pipe.flowVelocityFlow, 'flow')
+            pipe.specificPressureLossFlow = pipe.pressureLossFlow / pipe.length
 
             # Rücklauf Berechnung
-            path.pipeFlowVelocityReturn = self.calculate_flow_velocity(path.massFlowRate, path.pipeTypeReturn,
-                                                                       path.pipeNominalSizeReturn, 'return')
-            path.pipeReynoldReturn = self.calculate_reynold(path.pipeFlowVelocityReturn, path.pipeDiameterReturn,
-                                                            'return')
-            path.pipeLambdaReturn = self.calculate_lambda(path.pipeDiameterReturn, path.pipeReynoldReturn)
-            path.pipePressureLossReturn = self.calculate_pressure_loss(path.pipeLambdaReturn, path.length,
-                                                                       path.pipeDiameterReturn,
-                                                                       path.pipeFlowVelocityReturn, 'return')
-            path.pipeSpecificPressureLossReturn = path.pipePressureLossReturn / path.length
+            pipe.flowVelocityReturn = self.calculate_flow_velocity(pipe.massFlowRate, pipe.typeReturn,
+                                                                   pipe.nominalSizeReturn, 'return')
+            pipe.reynoldReturn = self.calculate_reynold(pipe.flowVelocityReturn, pipe.diameterReturn,
+                                                        'return')
+            pipe.lambdaReturn = self.calculate_lambda(pipe.diameterReturn, pipe.reynoldReturn)
+            pipe.pressureLossReturn = self.calculate_pressure_loss(pipe.lambdaReturn, pipe.length,
+                                                                   pipe.diameterReturn,
+                                                                   pipe.flowVelocityReturn, 'return')
+            pipe.specificPressureLossReturn = pipe.pressureLossReturn / pipe.length
 
     def set_building_data_to_connectors(self):
-        for point in filter(lambda p: p.type == 'Connector', self.pipe_points):
+        for point in filter(lambda p: p.type == 'Connector', self.points):
             building = self.bs.get_building_by_point_geometry(point.geometry)
-            point.powerHeatingW = building.powerHeating
-            point.powerHotWaterW = building.powerHotWater
+            point.powerHeating = building.powerHeating
+            point.powerHotWater = building.powerHotWater
 
             heat_capacity = self.bps.get_parameter_value('Massenstrom', 'spez. Wärmekapazität Massenstrom (Ws/kgK)')
             temperature_delta = self.bps.get_parameter_value('Netzauslegung', 'Temperaturdelta Vor-Rücklauf (K)')
 
             point.massFlowRate = building.powerHeating / (heat_capacity * temperature_delta)
 
-    def calculate_initial_pipe_diameter(self, path: PipePathData, flow_return):
+    def calculate_initial_pipe_diameter(self, path: Pipe, flow_return):
         water_density = self.get_water_density(flow_return)
         initial_flow_velocity = self.bps.get_parameter_value('Netzauslegung_initial', 'Strömungsgeschwindigkeit (m/s)')
 
@@ -185,21 +186,21 @@ class PipeCalculationService:
         return pipe_lambda * (pipe_length / (pipe_diameter / 1000.0)) * water_density * (
                 (pipe_flow_velocity ** 2) / 2.0)
 
-    def calculate_heat_loss(self, path):
+    def calculate_pipe_heat_loss(self, path):
         # Wärmeverlust
-        path.pipeHeatLossWinter = self.calculate_single_heat_loss(path.length,
-                                                                  path.pipeTypeFlow, path.pipeTypeReturn,
-                                                                  path.pipeNominalSizeFlow, path.pipeNominalSizeReturn,
-                                                                  path.pipeInsulationFlow, path.pipeInsulationReturn,
-                                                                  'winter')
-        path.pipeHeatLossSummer = self.calculate_single_heat_loss(path.length,
-                                                                  path.pipeTypeFlow, path.pipeTypeReturn,
-                                                                  path.pipeNominalSizeFlow, path.pipeNominalSizeReturn,
-                                                                  path.pipeInsulationFlow, path.pipeInsulationReturn,
-                                                                  'summer')
+        path.heatLossWinter = self.calculate_single_heat_loss(path.length,
+                                                              path.typeFlow, path.typeReturn,
+                                                              path.nominalSizeFlow, path.nominalSizeReturn,
+                                                              path.insulationFlow, path.insulationReturn,
+                                                              'winter')
+        path.heatLossSummer = self.calculate_single_heat_loss(path.length,
+                                                              path.typeFlow, path.typeReturn,
+                                                              path.nominalSizeFlow, path.nominalSizeReturn,
+                                                              path.insulationFlow, path.insulationReturn,
+                                                              'summer')
 
-        path.pipeSpecificHeatLossWinter = path.pipeHeatLossWinter / path.length
-        path.pipeSpecificHeatLossSummer = path.pipeHeatLossSummer / path.length
+        path.specificHeatLossWinter = path.heatLossWinter / path.length
+        path.specificHeatLossSummer = path.heatLossSummer / path.length
 
         # Massenstrom anpassen
 
@@ -224,10 +225,10 @@ class PipeCalculationService:
 
     def save_pipes(self):
         shortest_path_objects = []
-        for short_path in self.shortest_paths:
-            for path_id in short_path['path']:
-                shortest_path_objects.append(ShortestPathConnector(short_path['connector'], path_id))
+        for pipe in self.shortest_paths:
+            for path_id in pipe['path']:
+                shortest_path_objects.append(ShortestPathConnector(pipe['connector'], path_id))
 
-        self.ps.set_pipe_point_data(self.pipe_points)
-        self.ps.set_pipe_path_data(self.pipe_paths)
+        self.ps.set_pipe_point_data(self.points)
+        self.ps.set_pipe_path_data(self.pipes)
         self.ps.set_shortest_path_connector_data(shortest_path_objects)

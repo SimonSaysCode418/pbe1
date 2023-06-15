@@ -5,7 +5,7 @@ import pandas as pd
 class IWUService:
 
     def __init__(self):
-        self.iwu_data = pd.read_excel(os.getcwd() + '\\resources\\Waermebedarfskennwerte (IWU).xlsx',
+        self.iwu_data = pd.read_excel(os.getcwd() + '\\resources\\parameters\\Waermebedarfskennwerte (IWU).xlsx',
                                       sheet_name='Projektinput')
 
     def get_iwu_value(self, type, yoc, name):

@@ -1,11 +1,21 @@
+import shapely
 from shapely import wkb
 from shapely.geometry import shape
 
 
 class RawBuildingAddress:
+    id: int
+    longitude: float
+    latitude: float
+    street: str
+    housenumber: str
+    postcode: float
+    city: str
+    geometry: shapely.Polygon
+
     def __init__(self, x, y, street, number, code, city, geometry):
-        self.coordinateX = x
-        self.coordinateY = y
+        self.longitude = x
+        self.latitude = y
         self.street = street
         self.housenumber = number
         self.postcode = code

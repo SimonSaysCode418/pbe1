@@ -13,7 +13,7 @@ class PipeTypeService:
         self.pipe_types = {}
         sheet_names = ['PMR', 'PMR-Duo', 'KMR', 'KMR-Duo']
         for sheet_name in sheet_names:
-            self.pipe_types[sheet_name] = pd.read_excel(os.getcwd() + '\\resources\\DN_Rohrdurchmesser.xlsx',
+            self.pipe_types[sheet_name] = pd.read_excel(os.getcwd() + '\\resources\\parameters\\DN_Rohrdurchmesser.xlsx',
                                                         sheet_name=sheet_name)
 
     def get_pipe_element(self, diameter):

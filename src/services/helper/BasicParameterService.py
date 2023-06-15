@@ -5,7 +5,7 @@ import pandas as pd
 class BasicParameterService:
 
     def __init__(self):
-        df = pd.read_excel(os.getcwd() + '\\resources\\Parameter.xlsx')
+        df = pd.read_excel(os.getcwd() + '\\resources\\parameters\\Parameter.xlsx')
         self.parameters = {}
 
         for index, row in df.iterrows():
