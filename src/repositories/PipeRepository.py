@@ -33,8 +33,6 @@ class PipeRepository:
 
     def persist_paths(self):
         self.dbs.write_data_to_database(self.pipe_path_data)
-        self.dbs.run_sql_file('\\resources\\scripts\\pipe_view.sql')
 
     def persist_shortest_paths(self):
         self.dbs.write_data_to_database(self.shortest_path_data)
-        self.dbs.run_sql_file('\\resources\\scripts\\critical_path_view.sql')

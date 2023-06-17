@@ -19,8 +19,6 @@ class PipeTypeService:
     def get_pipe_element(self, diameter):
         pipe_type_priority = ['PMR-Duo', 'PMR', 'KMR-Duo', 'KMR']
 
-        # pipe_type_init = self.bps.get_parameter_value('Rohrauswahl', 'Initialer Rohrtyp')
-
         pipe_insulation_init = self.bps.get_parameter_value('Rohrauswahl', 'Initiale Dämmung')
 
         for pipe_type in pipe_type_priority:

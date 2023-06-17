@@ -3,6 +3,7 @@ from services.calculations.BuildingCalculationService import BuildingCalculation
 from services.calculations.PipeCalculationService import PipeCalculationService
 from services.data.BuildingService import BuildingService
 from services.data.PipeService import PipeService
+from services.database.DataBaseService import DataBaseService
 from services.helper.BasicParameterService import BasicParameterService
 from services.data.RawDataService import RawDataService
 
@@ -40,6 +41,13 @@ def main():
         del pipe_calculation
     else:
         pipe_service.initializeDB()
+
+    dbs = DataBaseService()
+    dbs.run_sql_file('\\resources\\scripts\\building_view.sql')
+    dbs.run_sql_file('\\resources\\scripts\\building_group_type_views.sql')
+    dbs.run_sql_file('\\resources\\scripts\\pipe_view.sql')
+    dbs.run_sql_file('\\resources\\scripts\\critical_path_views.sql')
+    dbs.run_sql_file('\\resources\\scripts\\total_demands_views.sql')
 
     del raw_data_service
     del building_service

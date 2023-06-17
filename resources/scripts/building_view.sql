@@ -10,13 +10,13 @@ SELECT "id"                         AS "ID",
        "groupname"                  AS "Gebäudegruppe",
        "roof"                       AS "Dachform",
        "floors"                     AS "Etagen",
-       "floorArea"                  AS "Grundfläche (m²)",
-       "energyReferenceArea"        AS "Energiebezugsfläche (m²)",
-       "livingArea"                 AS "Beheizte Wohnfläche (m²)",
-       "wallAreaPerFloor"           AS "Wandfläche je Etage (m²)",
-       "wallArea"                   AS "Wandfläche gesamt (m²)",
-       "roofArea"                   AS "Dachfläche (m²)",
-       "surface"                    AS "Hüllfläche (m²)",
+       ROUND("floorArea")           AS "Grundfläche (m²)",
+       ROUND("energyReferenceArea") AS "Energiebezugsfläche (m²)",
+       ROUND("livingArea")          AS "Beheizte Wohnfläche (m²)",
+       ROUND("wallAreaPerFloor")    AS "Wandfläche je Etage (m²)",
+       ROUND("wallArea")            AS "Wandfläche gesamt (m²)",
+       ROUND("roofArea")            AS "Dachfläche (m²)",
+       ROUND("surface")             AS "Hüllfläche (m²)",
        "volumeLivingArea"           AS "Volumen Wohnfläche (m³)",
        "transmissionSurface"        AS "Transmissionswärmeverlust Hüllfläche (W)",
        "transmission"               AS "Transmissionswärmeverlust (W)",
@@ -29,3 +29,6 @@ SELECT "id"                         AS "ID",
        "fullLoadHours"              AS "Volllaststunden",
        "geometry"
 FROM building;
+
+SELECT *
+FROM "Gebäude";

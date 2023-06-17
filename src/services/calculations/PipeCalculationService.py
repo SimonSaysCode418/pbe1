@@ -40,6 +40,7 @@ class PipeCalculationService:
         for pipe in self.pipes:
             self.initialize_pipe(pipe)
             self.optimize_pipe_by_pressure_loss(pipe)
+            self.calculate_pipe_heat_loss(pipe)
 
         self.save_pipes()
 
@@ -69,8 +70,6 @@ class PipeCalculationService:
         pipe.typeReturn = pipe.initialTypeReturn
         pipe.nominalSizeReturn = pipe.initialNominalSizeReturn
         pipe.insulationReturn = pipe.initialInsulationReturn
-
-        self.calculate_pipe_heat_loss(pipe)
 
     def optimize_pipe_by_pressure_loss(self, pipe):
 
@@ -134,9 +133,11 @@ class PipeCalculationService:
             point.powerHotWater = building.powerHotWater
 
             heat_capacity = self.bps.get_parameter_value('Massenstrom', 'spez. Wärmekapazität Massenstrom (Ws/kgK)')
-            temperature_delta = self.bps.get_parameter_value('Netzauslegung', 'Temperaturdelta Vor-Rücklauf (K)')
+            water_temperature_flow = self.bps.get_parameter_value('Netzauslegung', 'Vorlauftemperatur Winter (K)')
+            water_temperature_return = self.bps.get_parameter_value('Netzauslegung', 'Rücklauftemperatur Winter (K)')
 
-            point.massFlowRate = building.powerHeating / (heat_capacity * temperature_delta)
+            point.massFlowRate = building.powerHeating / (
+                        heat_capacity * (water_temperature_flow - water_temperature_return))
 
     def calculate_initial_pipe_diameter(self, path: Pipe, flow_return):
         water_density = self.get_water_density(flow_return)
@@ -210,11 +211,12 @@ class PipeCalculationService:
 
         if winter_summer == 'winter':
             floor_temperature = self.bps.get_parameter_value('Netzauslegung', 'Bodentemperatur Winter (K)')
+            water_temperature_flow = self.bps.get_parameter_value('Netzauslegung', 'Vorlauftemperatur Winter (K)')
+            water_temperature_return = self.bps.get_parameter_value('Netzauslegung', 'Rücklauftemperatur Winter (K)')
         else:
             floor_temperature = self.bps.get_parameter_value('Netzauslegung', 'Bodentemperatur Sommer (K)')
-
-        water_temperature_flow = self.bps.get_parameter_value('Netzauslegung', 'Vorlauftemperatur (K)')
-        water_temperature_return = self.bps.get_parameter_value('Netzauslegung', 'Rücklauftemperatur (K)')
+            water_temperature_flow = self.bps.get_parameter_value('Netzauslegung', 'Vorlauftemperatur Sommer (K)')
+            water_temperature_return = self.bps.get_parameter_value('Netzauslegung', 'Rücklauftemperatur Sommer (K)')
 
         specific_heat_loss_flow = self.pts.get_heat_loss(pipe_type_flow, pipe_nominal_size_flow, pipe_insulation_flow)
         specific_heat_loss_return = self.pts.get_heat_loss(pipe_type_return, pipe_nominal_size_return,

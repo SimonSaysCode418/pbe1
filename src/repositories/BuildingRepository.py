@@ -38,5 +38,3 @@ class BuildingRepository:
 
     def persist(self):
         self.dbs.write_data_to_database(self.building_data)
-        self.dbs.run_sql_file('\\resources\\scripts\\building_view.sql')
-

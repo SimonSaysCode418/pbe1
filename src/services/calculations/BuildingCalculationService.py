@@ -44,7 +44,6 @@ class BuildingCalculationService:
             building.demandHeating = self.calculateDemandHeatingWH(building)
             building.fullLoadHours = (building.demandHeating + building.demandHotWater) / (
                     building.powerHeating + building.powerHotWater)
-
         self.save_buildings()
 
     def calculateTransmissionSurface(self, building):
