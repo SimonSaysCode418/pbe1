@@ -1,4 +1,4 @@
-DROP VIEW IF EXISTS "Wärme- und Leistungsbedarf (Gebäudegruppen)";
+DROP VIEW IF EXISTS "Wärme- und Leistungsbedarf (Gebäudegruppen)" CASCADE;
 CREATE VIEW "Wärme- und Leistungsbedarf (Gebäudegruppen)" AS
 SELECT CASE
            WHEN GROUPING(groupname) = 1
@@ -15,7 +15,7 @@ GROUP BY
     ROLLUP (groupname)
 ORDER BY groupname <> 'Gesamt', groupname;
 
-DROP VIEW IF EXISTS "Wärme- und Leistungsbedarf (Gebäudetypen)";
+DROP VIEW IF EXISTS "Wärme- und Leistungsbedarf (Gebäudetypen)" CASCADE;
 CREATE VIEW "Wärme- und Leistungsbedarf (Gebäudetypen)" AS
 SELECT CASE
            WHEN GROUPING("type") = 1
@@ -32,7 +32,7 @@ GROUP BY
     ROLLUP ("type")
 ORDER BY "type" <> 'Gesamt', "type";
 
-DROP VIEW IF EXISTS "Wohnfläche (Gebäudegruppen)";
+DROP VIEW IF EXISTS "Wohnfläche (Gebäudegruppen)" CASCADE;
 CREATE VIEW "Wohnfläche (Gebäudegruppen)" AS
 SELECT CASE
            WHEN GROUPING(groupname) = 1
@@ -47,7 +47,7 @@ GROUP BY
     ROLLUP (groupname)
 ORDER BY groupname <> 'Gesamt', groupname;
 
-DROP VIEW IF EXISTS "Arbeitsfläche (Gebäudegruppen)";
+DROP VIEW IF EXISTS "Arbeitsfläche (Gebäudegruppen)" CASCADE;
 CREATE VIEW "Arbeitsfläche (Gebäudegruppen)" AS
 SELECT CASE
            WHEN GROUPING(groupname) = 1
@@ -61,15 +61,3 @@ WHERE "type" = 'Commerce'
 GROUP BY
     ROLLUP (groupname)
 ORDER BY groupname <> 'Gesamt', groupname;
-
-SELECT *
-FROM "Wärme- und Leistungsbedarf (Gebäudegruppen)";
-
-SELECT *
-FROM "Wärme- und Leistungsbedarf (Gebäudetypen)";
-
-SELECT *
-FROM "Wohnfläche (Gebäudegruppen)";
-
-SELECT *
-FROM "Arbeitsfläche (Gebäudegruppen)";

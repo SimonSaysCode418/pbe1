@@ -13,8 +13,9 @@ class PipeTypeService:
         self.pipe_types = {}
         sheet_names = ['PMR', 'PMR-Duo', 'KMR', 'KMR-Duo']
         for sheet_name in sheet_names:
-            self.pipe_types[sheet_name] = pd.read_excel(os.getcwd() + '\\resources\\parameters\\DN_Rohrdurchmesser.xlsx',
-                                                        sheet_name=sheet_name)
+            self.pipe_types[sheet_name] = pd.read_excel(
+                os.getcwd() + '\\resources\\parameters\\DN_Rohrdurchmesser.xlsx',
+                sheet_name=sheet_name)
 
     def get_pipe_element(self, diameter):
         pipe_type_priority = ['PMR-Duo', 'PMR', 'KMR-Duo', 'KMR']
@@ -26,7 +27,9 @@ class PipeTypeService:
             pipes = filtered_types.loc[(filtered_types['Innendurchmesser'] >= diameter)].to_dict(orient='records')
             if pipes:
                 pipe = pipes[0]
-                return [pipe_type, pipe['Nennweite'], pipe_insulation_init, pipe['Innendurchmesser']]
+                # Preise sind für die Verlegung für Vor- und Rücklauf angegeben (hier: nur Vor- oder Rücklauf)
+                return [pipe_type, pipe['Nennweite'], pipe_insulation_init, pipe['Innendurchmesser'],
+                        pipe['Kosten Straße €/m'] / 2]
         return None
 
     def get_pipe_element_next_size(self, pipe_type, nominal_size):
@@ -34,20 +37,10 @@ class PipeTypeService:
         pipe = filtered_types.loc[(filtered_types['Nennweite'] == nominal_size)].to_dict(orient='records')[0]
         return self.get_pipe_element(pipe['Innendurchmesser'] + 0.0001)  # 0.0001 für nächste Rohrgröße
 
-    def get_inner_diameter(self, type, nominal_size):
-        filtered_types = self.pipe_types[type]
-        pipes = filtered_types.loc[(filtered_types['Nennweite'] == nominal_size)].to_dict(orient='records')
-
-        pipe = pipes[0]
-
-        return pipe['Innendurchmesser']
-
     def get_heat_loss(self, type, nominal_size, insulation):
         filtered_types = self.pipe_types[type]
         pipes = filtered_types.loc[(filtered_types['Nennweite'] == nominal_size)].to_dict(orient='records')
-
         pipe = pipes[0]
-
         return pipe[insulation + '-W']
 
     def get_relative_pipe_roughness_D_k(self, inner_diameter):

@@ -165,8 +165,8 @@ class RawDataService:
 
         self.rdr.persist()
 
-    def get_raw_pipe_path_data(self):
+    def get_raw_pipe_data(self):
         return DataFrame.from_records(vars(o) for o in self.rdr.raw_pipe_data)
 
-    def get_raw_pipe_point_data(self):
+    def get_raw_point_data(self):
         return DataFrame.from_records(vars(o) for o in self.rdr.raw_point_data)

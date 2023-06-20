@@ -48,6 +48,7 @@ def main():
     dbs.run_sql_file('\\resources\\scripts\\pipe_view.sql')
     dbs.run_sql_file('\\resources\\scripts\\critical_path_views.sql')
     dbs.run_sql_file('\\resources\\scripts\\total_demands_views.sql')
+    dbs.run_sql_file('\\resources\\scripts\\source.sql')
 
     del raw_data_service
     del building_service

@@ -73,7 +73,7 @@ class BuildingCalculationService:
     def calculateVentilationHeatLoss(self, building, complex):
         air_exchange_rate = self.ps.get_parameter_value('Lüftungswechselwärmeverlust', 'Luftwechselzahl')
         heat_capacity_air = self.ps.get_parameter_value('Lüftungswechselwärmeverlust',
-                                                        'spez. Wärmekapazität Luft (kJ/kgK)')
+                                                        'spez. Wärmekapazität Luft (Wh/kgK)')
         air_density_in = self.ps.get_parameter_value('Lüftungswechselwärmeverlust', 'Luftdichte [21°C] (kg/m³)')
         air_density_out = self.ps.get_parameter_value('Lüftungswechselwärmeverlust', 'Luftdichte [-12°C] (kg/m³)')
         temperature_in, temperature_out = self.get_temperature(building)

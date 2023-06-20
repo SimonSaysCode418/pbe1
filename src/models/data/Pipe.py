@@ -5,12 +5,13 @@ from shapely.geometry import shape
 
 class Pipe(object):
     id: int
-    startPointId: float
-    endPointId: float
+    location: str
+    startPointId: int
+    endPointId: int
     length: float
     geometry: shapely.LineString
 
-    massFlowRate: float
+    initialMassFlowRate: float
 
     initialDiameterFlow: float
     initialTypeFlow: str
@@ -21,6 +22,8 @@ class Pipe(object):
     initialTypeReturn: str
     initialNominalSizeReturn: float
     initialInsulationReturn: str
+
+    massFlowRate: float
 
     typeFlow: str
     nominalSizeFlow: float
@@ -43,9 +46,12 @@ class Pipe(object):
     specificPressureLossReturn: float
 
     heatLossWinter: float
-    specificHeatLossWinter: float
     heatLossSummer: float
-    specificHeatLossSummer: float
+
+    specificCostsFlow: float
+    specificCostsReturn: float
+    costsFlow: float
+    costsReturn: float
 
     def __init__(self, *args):
         if len(args):
