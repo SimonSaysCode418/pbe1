@@ -18,23 +18,23 @@ class PipeService:
         self.dbs.create_table_from_class(Point)
         self.dbs.create_table_from_class(Pipe)
         self.dbs.create_table_from_class(ShortestPathConnector)
-        self.pr.initialize(raw_data_service.get_raw_pipe_point_data(), raw_data_service.get_raw_pipe_path_data())
+        self.pr.initialize(raw_data_service.get_raw_point_data(), raw_data_service.get_raw_pipe_data())
 
     def initializeDB(self):
         self.pr.initializeDB()
 
-    def get_pipe_point_data(self):
-        return self.pr.pipe_point_data
+    def get_point_data(self):
+        return self.pr.point_data
 
-    def set_pipe_point_data(self, pipe_points):
-        self.pr.pipe_point_data = pipe_points
+    def set_point_data(self, points):
+        self.pr.point_data = points
         self.pr.persist_points()
 
-    def get_pipe_path_data(self):
+    def get_pipe_data(self):
         return self.pr.pipe_path_data
 
-    def set_pipe_path_data(self, pipe_paths):
-        self.pr.pipe_path_data = pipe_paths
+    def set_pipe_data(self, pipes):
+        self.pr.pipe_path_data = pipes
         self.pr.persist_paths()
 
     def set_shortest_path_connector_data(self, shortest_paths):

@@ -15,13 +15,10 @@ FROM (SELECT pc."pipeId"
          JOIN "Rohrleitungen" r
               ON cpi."pipeId" = r."ID";
 
--- DROP VIEW IF EXISTS "Druckverlust des Netzes";
--- CREATE VIEW "Druckverlust des Netzes" AS
-SELECT ROUND((SUM("Druckverlust VL (Pa)") + SUM("Druckverlust RL (Pa)") + 100000) / 100000, 2)
+DROP VIEW IF EXISTS "Druckverlust des Netzes" CASCADE;
+CREATE VIEW "Druckverlust des Netzes" AS
+SELECT ROUND((SUM("Druckverlust VL (Pa)") + SUM("Druckverlust RL (Pa)") + 100000) / 100000, 2) --Druckverlust Rohre und 1bar für Hausanschluss
            AS "Druckverlust des kritischen Pfads (bar)",
        ROUND((SUM("Druckverlust VL (Pa)") + SUM("Druckverlust RL (Pa)")) / SUM("Länge (m)" * 2), 2)
            AS "spez. Druckverlust des kritischen Pfads (Pa/m)"
-FROM "Kritischer Pfad";
-
-SELECT *
 FROM "Kritischer Pfad";
