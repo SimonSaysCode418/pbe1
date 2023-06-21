@@ -10,6 +10,7 @@ class Building(object):
     postcode: float
     city: str
     type: str
+    iwuCode: str
     floorArea: float
     wallAreaPerFloor: float
     roof: str
@@ -23,7 +24,7 @@ class Building(object):
     livingArea: float
     volumeLivingArea: float
     transmissionSurface: float
-    transmission: float
+    transmissionLivingArea: float
     ventilationHeatLoss: float
     ventilationHeatLossComplex: float
     powerHotWater: float
@@ -42,6 +43,7 @@ class Building(object):
                 self.postcode = getattr(args, 'postcode')
                 self.city = getattr(args, 'city')
                 self.type = getattr(args, 'type')
+                self.iwuCode = getattr(args, 'iwuCode')
                 self.floorArea = getattr(args, 'floorArea')
                 self.wallAreaPerFloor = getattr(args, 'wallArea')
                 self.roof = getattr(args, 'roof')

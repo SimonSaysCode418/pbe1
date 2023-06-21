@@ -39,7 +39,7 @@ class DataBaseService:
                                            password="FH2023Aachen!",
                                            host="85.215.240.105",
                                            port="5432",
-                                           database="miesheimer_weg_neu")
+                                           database="miesheimer_weg")
         self.connection.autocommit = True
         self.cursor = self.connection.cursor()
 

@@ -35,11 +35,11 @@ class BuildingCalculationService:
             building.volumeLivingArea = building.livingArea * self.ps.get_parameter_value(
                 'Gebäudefaktor', 'Raumhöhe (m)')
             building.transmissionSurface = self.calculateTransmissionSurface(building)
-            building.transmission = self.calculateTransmissionLivingArea(building)
+            building.transmissionLivingArea = self.calculateTransmissionLivingArea(building)
             building.ventilationHeatLoss = self.calculateVentilationHeatLoss(building, 0)
             building.ventilationHeatLossComplex = self.calculateVentilationHeatLoss(building, 1)
             building.powerHotWater = self.calculatePowerHotWaterW(building)
-            building.powerHeating = building.transmission + building.ventilationHeatLoss
+            building.powerHeating = building.transmissionSurface + building.ventilationHeatLoss
             building.demandHotWater = self.calculateDemandHotWaterWH(building)
             building.demandHeating = self.calculateDemandHeatingWH(building)
             building.fullLoadHours = (building.demandHeating + building.demandHotWater) / (
@@ -47,27 +47,23 @@ class BuildingCalculationService:
         self.save_buildings()
 
     def calculateTransmissionSurface(self, building):
-        coefficient = self.iwus.get_iwu_value(building.type, building.yearOfConstruction,
-                                              'Wärmetransferkoeffizient Hüllfläche (W/m²K)')
+        coefficient = self.iwus.get_iwu_value(building.iwuCode, 'Wärmetransferkoeffizient Hüllfläche (W/m²K)')
         temperature_in, temperature_out = self.get_temperature(building)
         transmission = coefficient * building.surface * (temperature_in - temperature_out)
 
         if (building.type.startswith('Fire Department')) | (building.type == 'Commerce'):
             transmission = transmission * self.ps.get_parameter_value('Transmissionswärmeverlust',
                                                                       'Geschäfts- und Feuerwehrtransmission')
-
         return transmission
 
     def calculateTransmissionLivingArea(self, building):
-        coefficient = self.iwus.get_iwu_value(building.type, building.yearOfConstruction,
-                                              'Wärmetransferkoeffizient Wohnfläche (W/m²K)')
+        coefficient = self.iwus.get_iwu_value(building.iwuCode, 'Wärmetransferkoeffizient Wohnfläche (W/m²K)')
         temperature_in, temperature_out = self.get_temperature(building)
         transmission = coefficient * building.livingArea * (temperature_in - temperature_out)
 
         if (building.type.startswith('Fire Department')) | (building.type == 'Commerce'):
             transmission = transmission * self.ps.get_parameter_value('Transmissionswärmeverlust',
                                                                       'Geschäfts- und Feuerwehrtransmission')
-
         return transmission
 
     def calculateVentilationHeatLoss(self, building, complex):
@@ -87,8 +83,7 @@ class BuildingCalculationService:
         return ventilation_heat_loss
 
     def calculatePowerHotWaterW(self, building):
-        heat_production = self.iwus.get_iwu_value(building.type, building.yearOfConstruction,
-                                                  'Wärmeerzeugung WW (kWh/m²a)')
+        heat_production = self.iwus.get_iwu_value(building.iwuCode, 'Wärmeerzeugung WW (kWh/m²a)')
 
         full_load_hours_hot_water = self.ps.get_parameter_value('Warmwasser', 'Volllaststunden')
 
@@ -111,9 +106,8 @@ class BuildingCalculationService:
         return temperature_in, temperature_out
 
     def calculateDemandHotWaterWH(self, building):
-        demand_hot_water = building.livingArea * self.iwus.get_iwu_value(
-            building.type, building.yearOfConstruction, 'Wärmeerzeugung WW (kWh/m²a)')
-
+        demand_hot_water = building.livingArea * self.iwus.get_iwu_value(building.iwuCode,
+                                                                         'Wärmeerzeugung WW (kWh/m²a)')
         if building.type == 'Fire Department Administration':
             demand_hot_water = demand_hot_water * self.ps.get_parameter_value('Warmwasser',
                                                                               'Feuerwehrhauptgebäude')
@@ -123,9 +117,8 @@ class BuildingCalculationService:
         return demand_hot_water * 1000
 
     def calculateDemandHeatingWH(self, building):
-        demand_heating = building.livingArea * self.iwus.get_iwu_value(
-            building.type, building.yearOfConstruction, 'Wärmeerzeugung Heizung (kWh/m²a)')
-
+        demand_heating = building.livingArea * self.iwus.get_iwu_value(building.iwuCode,
+                                                                       'Wärmeerzeugung Heizung (kWh/m²a)')
         if building.type == 'Fire Department Administration':
             demand_heating = demand_heating * self.ps.get_parameter_value('Heizung',
                                                                           'Feuerwehrhauptgebäude')
@@ -135,7 +128,6 @@ class BuildingCalculationService:
         if building.type == 'Commerce':
             demand_heating = demand_heating * self.ps.get_parameter_value('Heizung',
                                                                           'Geschäftsgebäude')
-
         return demand_heating * 1000
 
     def save_buildings(self):

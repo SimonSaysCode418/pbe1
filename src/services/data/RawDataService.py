@@ -33,7 +33,7 @@ class RawDataService:
         self.rdr.initialize()
 
     def import_building_data(self):
-        dataset = pd.read_json(os.getcwd() + '\\resources\\inputs\\buildings.json')
+        dataset = pd.read_json(os.getcwd() + '\\resources\\inputs\\buildings_neu.json')
         elements = dataset['features']
 
         buildings = [element for element in elements if element['geometry']['type'] == 'Polygon']
@@ -44,6 +44,7 @@ class RawDataService:
 
             self.rdr.set_raw_data(RawBuildingThermosData(
                 building['properties']['candidate/user-fields Category'],
+                building['properties']['code'],
                 float("{:.8f}".format(coordinates[0])),
                 float("{:.8f}".format(coordinates[1])),
                 building['properties']['cooling/kwp'],

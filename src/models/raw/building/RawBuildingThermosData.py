@@ -6,6 +6,7 @@ from shapely.geometry import shape
 class RawBuildingThermosData(object):
     id: int
     type: str
+    iwuCode: str
     longitude: float
     latitude: float
     kwpCooling: float
@@ -16,8 +17,9 @@ class RawBuildingThermosData(object):
     wallArea: float
     geometry: shapely.Polygon
 
-    def __init__(self, building_type, x, y, kwp_c, kwp_d, kwh_c, kwh_d, ground_area, wall_area, geometry):
+    def __init__(self, building_type, iwu_code, x, y, kwp_c, kwp_d, kwh_c, kwh_d, ground_area, wall_area, geometry):
         self.type = building_type
+        self.iwuCode = iwu_code
         self.longitude = x
         self.latitude = y
         self.kwpCooling = kwp_c
@@ -43,6 +45,7 @@ class RawBuildingThermosDataDB(RawBuildingThermosData):
             args[7],
             args[8],
             args[9],
-            wkb.loads(args[10], hex=True).__geo_interface__
+            args[10],
+            wkb.loads(args[11], hex=True).__geo_interface__
         )
         self.id = args[0]
