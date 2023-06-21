@@ -78,7 +78,7 @@ class PipeCalculationService:
 
             share_network_heat_loss = (network_power_heat_loss * 8760) / building_energy_demand
 
-            # TODO: delta < 2 statt delta = 0 (2 statt 3 Iterationen)
+            # Auswirkung delta <0.02 statt delta=0: 2 statt 3 Iterationen
             if (share_network_heat_loss - last_iteration_share_network_heat_loss) < 0.02:
                 break
 
